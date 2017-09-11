@@ -1,0 +1,26 @@
+library(caret)
+if (!file.exists(&#34;pml_training.csv&#34;)) {
+    download.file(&#34;http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&#34;, destfile &#61; &#34;pml_training.csv&#34;)
+}
+if (!file.exists(&#34;pml_testing.csv&#34;)) {
+    download.file(&#34;http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&#34;, destfile &#61; &#34;pml_testing.csv&#34;)
+}
+
+Training &lt;- read.csv(&#34;pml_training.csv&#34;, header &#61; TRUE, na.strings &#61; c(&#34;NA&#34;,&#34;&#34;))
+Testing &lt;- read.csv(&#34;pml_testing.csv&#34;, header &#61; TRUE, na.strings &#61; c(&#34;NA&#34;,&#34;&#34;))dim(Training)summary(Training)
+table(Training$classe)nsv &lt;- nearZeroVar(Training, saveMetrics &#61; T)Training &lt;- Training[, !nsv$nzv]
+nsv1 &lt;- nearZeroVar(Testing, saveMetrics &#61; T)
+Testing &lt;- Testing[, !nsv1$nzv]#Remove columns (variables) that have 0.9% NAsnav &lt;- sapply(colnames(Training), function(x) if(sum(is.na(Training[, x])) &gt; 0.9*nrow(Training)){return(T)}else{return(F)})
+TrainingX &lt;- Training[, !nav]
+TrainingX &lt;- subset(TrainingX, select&#61;-c(X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp))nav1 &lt;- sapply(colnames(Testing), function(x) if(sum(is.na(Testing[, x])) &gt; 0.9*nrow(Testing)){return(T)}else{return(F)})TestingX &lt;- Testing[, !nav1]
+TestingX &lt;- subset(TestingX, select&#61;-c(X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp))
+predict(Final_Model, TestingX)
+prediction &lt;- as.character(predict(Final_Model, TestingX))
+pml_write_files &#61; function(x){
+  n &#61; length(x)
+  for(i in 1:n){
+    filename &#61; paste0(&#34;~/results/problem_id_&#34;, i, &#34;.txt&#34;)
+    write.table(x[i], file &#61; filename, quote &#61; FALSE, row.names &#61; FALSE, col.names &#61; FALSE)
+  }
+}
+pml_write_files(prediction)
